@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Downloader with Pre-Roll Ads</title>
+
+<!-- ✅ Google AdSense Global Script (with client ID) -->
+<script async 
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4721236035384396"
+        crossorigin="anonymous"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f4f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+}
+button {
+  padding: 12px;
+  width: 100%;
+  background: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover { background: #cc0000; }
+.result { margin-top: 20px; display: none; }
+.thumbnail { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+#formats { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+.download-btn {
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+.download-btn:hover { background: #218838; }
+.error { color: red; margin-top: 10px; font-weight: bold; }
+
+/* Full-screen pre-roll modal */
+#adModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  flex-direction: column;
+  color: white;
+}
+#adContent { text-align: center; width: 90%; max-width: 500px; }
+#countdown { font-size: 24px; font-weight: bold; margin: 20px 0; }
+#adContainer { width: 100%; max-width: 468px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>YouTube Audio/Video Downloader</h1>
+  <input type="text" id="videoURL" placeholder="Paste YouTube URL here" />
+  <button id="fetchBtn">Fetch Video Info</button>
+
+  <div class="result" id="result">
+    <img id="thumbnail" class="thumbnail" src="" alt="Thumbnail">
+    <h3 id="title"></h3>
+    <div id="formats"></div>
+  </div>
+
+  <div id="errorMsg" class="error"></div>
+</div>
+
+<!-- ✅ Full-screen Pre-roll Ad Modal -->
+<div id="adModal">
+  <div id="adContent">
+    <h2>Advertisement</h2>
+    <div id="countdown">Download starts in 5 seconds...</div>
+
+    <div id="adContainer">
+      <!-- ✅ Real Google AdSense Ad Unit -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-4721236035384396"
+           data-ad-slot="5066017660"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+  </div>
+</div>
+
+<script>
+const fetchBtn = document.getElementById('fetchBtn');
+const videoURL = document.getElementById('videoURL');
+const resultBox = document.getElementById('result');
+const thumbnail = document.getElementById('thumbnail');
+const title = document.getElementById('title');
+const formatsDiv = document.getElementById('formats');
+const errorMsg = document.getElementById('errorMsg');
+const adModal = document.getElementById('adModal');
+const countdownText = document.getElementById('countdown');
+
+// ✅ Fetch video/audio info
+fetchBtn.addEventListener('click', async () => {
+  const url = videoURL.value.trim();
+  if (!url) {
+    errorMsg.textContent = "Please enter a URL";
+    return;
+  }
+
+  errorMsg.textContent = "";
+  resultBox.style.display = "none";
+  formatsDiv.innerHTML = "";
+
+  try {
+    const res = await fetch("http://localhost:3000/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      errorMsg.textContent = data.error;
+      return;
+    }
+
+    thumbnail.src = data.thumbnail;
+    title.textContent = data.title;
+    resultBox.style.display = "block";
+
+    // Video formats
+    if (data.formats && data.formats.length > 0) {
+      data.formats.forEach(f => {
+        const btn = document.createElement('button');
+        btn.className = "download-btn";
+        btn.textContent = `${f.ext.toUpperCase()} - ${f.resolution || 'Video'}`;
+        btn.onclick = () => startAdPreRoll(f.url);
+        formatsDiv.appendChild(btn);
+      });
+    }
+
+    // Audio formats
+    if (data.audio && data.audio.length > 0) {
+      const audioHeader = document.createElement('h4');
+      audioHeader.textContent = "Audio Downloads";
+      formatsDiv.appendChild(audioHeader);
+
+      data.audio.forEach(aud => {
+        const btn = document.createElement('button');
+        btn.className = "download-btn";
+        btn.textContent = `${aud.ext.toUpperCase()} - ${aud.abr} kbps`;
+        btn.onclick = () => startAdPreRoll(aud.url);
+        formatsDiv.appendChild(btn);
+      });
+    }
+
+  } catch (err) {
+    console.error(err);
+    errorMsg.textContent = "Failed to fetch video info. Make sure server is running.";
+  }
+});
+
+// ✅ Pre-roll ad + countdown before starting download
+function startAdPreRoll(downloadUrl) {
+  adModal.style.display = "flex";
+  let timeLeft = 5;
+
+  countdownText.textContent = `Download starts in ${timeLeft} seconds...`;
+
+  const timer = setInterval(() => {
+    timeLeft--;
+    countdownText.textContent = `Download starts in ${timeLeft} seconds...`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+
+      // Load AdSense ad unit (this must happen after modal shows)
+      (adsbygoogle = window.adsbygoogle || []).push({});
+
+      // Wait 2s for ad visibility
+      setTimeout(() => {
+        adModal.style.display = "none";
+
+        // Trigger the download
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }, 2000);
+    }
+  }, 1000);
+}
+</script>
+
+</body>
+</html>
