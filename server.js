@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { execFile } = require('child_process');
 const path = require('path');
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -11,6 +12,12 @@ app.use(bodyParser.json());
 const PROJECT_DIR = __dirname;
 const YTDLP_PATH = path.join(PROJECT_DIR, 'yt-dlp.exe');
 const FFMPEG_PATH = path.join(PROJECT_DIR, 'ffmpeg.exe');
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // Ensure ffmpeg is accessible
 process.env.PATH = `${process.env.PATH};${path.dirname(FFMPEG_PATH)}`;
