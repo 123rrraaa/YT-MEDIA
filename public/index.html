@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Downloader with Pre-Roll Ads</title>
+<title>YouTube Audio/Video Downloader</title>
 
 <!-- ✅ Google AdSense Global Script (with client ID) -->
 <script async 
@@ -145,10 +145,10 @@ fetchBtn.addEventListener('click', async () => {
   formatsDiv.innerHTML = "";
 
   try {
-    const res = await fetch("http://localhost:3000/download", {
+    const res = await fetch("https://yt-media.onrender.com/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ videoUrl })
     });
     const data = await res.json();
 
