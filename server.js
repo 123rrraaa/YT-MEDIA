@@ -1,10 +1,10 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { execFile } from "child_process";
 
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { execFile } = require('child_process');
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
