@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Audio/Video Downloader</title>
+<title>YouTube Downloader with Pre-Roll Ads</title>
 
 <!-- ✅ Google AdSense Global Script (with client ID) -->
 <script async 
@@ -145,10 +145,10 @@ fetchBtn.addEventListener('click', async () => {
   formatsDiv.innerHTML = "";
 
   try {
-    const res = await fetch("/download", {
+    const res = await fetch("http://localhost:3000/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url })  // make sure it matches server field
+      body: JSON.stringify({ url })
     });
     const data = await res.json();
 
@@ -207,13 +207,14 @@ function startAdPreRoll(downloadUrl) {
     if (timeLeft <= 0) {
       clearInterval(timer);
 
-      // Load AdSense ad unit (optional)
+      // Load AdSense ad unit (this must happen after modal shows)
       (adsbygoogle = window.adsbygoogle || []).push({});
 
+      // Wait 2s for ad visibility
       setTimeout(() => {
         adModal.style.display = "none";
 
-        // Trigger download
+        // Trigger the download
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = '';
