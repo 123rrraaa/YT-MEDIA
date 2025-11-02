@@ -22,9 +22,6 @@ app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Ensure ffmpeg is accessible
-process.env.PATH = `${process.env.PATH};${path.dirname(FFMPEG_PATH)}`;
-
 app.post('/download', (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
