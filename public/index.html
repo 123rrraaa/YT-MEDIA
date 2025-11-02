@@ -145,10 +145,10 @@ fetchBtn.addEventListener('click', async () => {
   formatsDiv.innerHTML = "";
 
   try {
-    const res = await fetch("https://yt-media.onrender.com/download", {
+    const res = await fetch("/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ url })  // make sure it matches server field
     });
     const data = await res.json();
 
@@ -207,14 +207,13 @@ function startAdPreRoll(downloadUrl) {
     if (timeLeft <= 0) {
       clearInterval(timer);
 
-      // Load AdSense ad unit (this must happen after modal shows)
+      // Load AdSense ad unit (optional)
       (adsbygoogle = window.adsbygoogle || []).push({});
 
-      // Wait 2s for ad visibility
       setTimeout(() => {
         adModal.style.display = "none";
 
-        // Trigger the download
+        // Trigger download
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = '';
