@@ -148,7 +148,7 @@ fetchBtn.addEventListener('click', async () => {
     const res = await fetch("https://yt-media.onrender.com/download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ videoUrl })
+      body: JSON.stringify({ url })
     });
     const data = await res.json();
 
