@@ -13,8 +13,8 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const PROJECT_DIR = __dirname;
-const YTDLP_PATH = path.join(PROJECT_DIR, 'yt-dlp.exe');
-const FFMPEG_PATH = path.join(PROJECT_DIR, 'ffmpeg.exe');
+const YTDLP_PATH = 'yt-dlp';   // system-installed binary
+const FFMPEG_PATH = 'ffmpeg';
 
 app.use(express.static(path.join(__dirname, "public")));
 
